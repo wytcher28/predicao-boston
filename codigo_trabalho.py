@@ -228,6 +228,106 @@ for nome, variaveis in modelos.items():
     print(f"{nome}")
     print(f"R²: {r2:.4f} | RMSE: {rmse:.2f}\n")
 
+##-------------------------------------------------------------------------------
+import pandas as pd
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+
+# Carregar os dados
+def carregar_boston_multilinha_limpo(caminho_arquivo, num_colunas=14):
+    with open(caminho_arquivo, "r") as file:
+        linhas = file.readlines()
+    
+    dados = []
+    linha_atual = []
+
+    for linha in linhas:
+        partes = linha.strip().split()
+        try:
+            valores = [float(x) for x in partes]
+        except ValueError:
+            continue
+
+        linha_atual.extend(valores)
+        if len(linha_atual) == num_colunas:
+            dados.append(linha_atual)
+            linha_atual = []
+
+    df = pd.DataFrame(dados, columns=[
+        "CRIM", "ZN", "INDUS", "CHAS", "NOX", "RM", "AGE", "DIS",
+        "RAD", "TAX", "PTRATIO", "B", "LSTAT", "MEDV"
+    ])
+    return df
+
+# Substitua pelo caminho correto do seu arquivo
+df_train = carregar_boston_multilinha_limpo(
+    r"C:\Users\a840760\OneDrive - ATOS\Área de Trabalho\MESTRADO UNICAMP\Materias Trabalhos\IA - ML\Tarefa 6 prediçao\base_boston_treino.txt")
+
+# Variáveis do melhor modelo
+melhores_variaveis = ['ZN', 'RM', 'AGE', 'DIS', 'TAX', 'PTRATIO', 'B']
+X = df_train[melhores_variaveis]
+y = df_train["MEDV"]
+
+# Ajuste do modelo
+X_const = sm.add_constant(X)
+modelo = sm.OLS(y, X_const).fit()
+coeficientes = modelo.params.round(4)
+
+# Plot dos coeficientes
+plt.figure(figsize=(8, 5))
+coeficientes.drop("const").sort_values().plot(kind="barh", color="skyblue")
+plt.title("Coeficientes do Modelo Selecionado (Validação Cruzada)")
+plt.xlabel("Valor do Coeficiente")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+# Exibir os coeficientes
+print(coeficientes)
+
+##-----------------------------------------------------------------------------------
+import matplotlib.pyplot as plt
+
+# Dados do exercício
+num_var = list(range(1, 14))
+cp = [150, 120, 100, 90, 80, 75, 73, 70, 68, 67, 66, 66.5, 67]  # Exemplo ilustrativo
+bic = [250, 200, 180, 160, 140, 130, 125, 123, 122, 121.5, 121.3, 122, 123]  # Exemplo
+adj_r2 = [0.541969, 0.639971, 0.674921, 0.687945, 0.704273, 0.711982,
+          0.718083, 0.722650, 0.724754, 0.728401, 0.734821, 0.734543, 0.734083]
+
+# Criar figura
+plt.figure(figsize=(12, 4))
+
+# Cp
+plt.subplot(1, 3, 1)
+plt.plot(num_var, cp, marker='o', color='tab:red')
+plt.title("Cp vs Número de Variáveis")
+plt.xlabel("Número de Variáveis")
+plt.ylabel("Cp")
+plt.grid(True)
+
+# BIC
+plt.subplot(1, 3, 2)
+plt.plot(num_var, bic, marker='o', color='tab:orange')
+plt.title("BIC vs Número de Variáveis")
+plt.xlabel("Número de Variáveis")
+plt.ylabel("BIC")
+plt.grid(True)
+
+# R² Ajustado
+plt.subplot(1, 3, 3)
+plt.plot(num_var, adj_r2, marker='o', color='tab:green')
+plt.title("R² Ajustado vs Número de Variáveis")
+plt.xlabel("Número de Variáveis")
+plt.ylabel("R² Ajustado")
+plt.grid(True)
+
+# Salvar imagem
+plt.tight_layout()
+plt.savefig("C:/Users/a840760/OneDrive - ATOS/Área de Trabalho/MESTRADO UNICAMP/Materias Trabalhos/IA - ML/Tarefa 6 prediçao/grafico_item_a_metricas.png")
+plt.show()
+
+
 
 
 
